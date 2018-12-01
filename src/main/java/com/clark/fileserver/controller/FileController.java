@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -66,6 +67,11 @@ public class FileController {
         return "上传失败";
     }
 
+    /**
+     * 多文件上传
+     * @param request
+     * @return
+     */
     @PostMapping("/batch")
     public String handleFileUpload(HttpServletRequest request) {
         List<MultipartFile> files = ((MultipartHttpServletRequest) request).getFiles("file");
@@ -77,10 +83,24 @@ public class FileController {
         for (int i = 0; i < fileSize; i++) {
             file = files.get(i);
             if (!file.isEmpty()) {
-
+                try {
+                    byte[] bytes = file.getBytes();
+                    //设置文件路径以及名称
+                    stream = new BufferedOutputStream(new FileOutputStream(
+                            new File(filePath + file.getOriginalFilename())));
+                    stream.write(bytes);
+                    stream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    stream = null;
+                    return "第 " + i + " 个文件上传失败 ==> "
+                            + e.getMessage();
+                }
+            }else {
+                return "第 " + i + " 个文件上传失败，因为该文件为空";
             }
         }
-        return "上传失败";
+        return "上传成功";
     }
 
 }
