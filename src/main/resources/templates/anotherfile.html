@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文件传输</title>
+    <link th:href="@{/bootstrap/css/bootstrap.css}" rel="stylesheet">
+    <script th:src="@{/jquery/jquery-3.3.1.min.js}"></script>
+    <script th:src="@{/axios/axios.min.js}"></script>
+    <script th:src="@{/vue/vue.min.js}"></script>
+</head>
+<style>
+    .form-actions{
+        margin-top: -15px;
+        margin-bottom: -5px;
+    }
+    .download-title{
+        margin-left: 20px;
+    }
+</style>
+<body>
+<div id="app">
+    <div class="form-actions">
+        <h4>文件上传</h4>
+        <hr/>
+        <div>
+            文件：<input id="file" type="file" name="file"  multiple="multiple"/>
+            <a href="#" class="btn btn-info" @click="upload" id="upload">上传</a>
+            <a href="/oldFile" class="btn btn-danger" style="float: right">旧版上传页面</a>
+        </div>
+    </div>
+    <div class="form-actions">
+        <div class="download-title">
+            <h4>文件下载</h4>
+            <p>
+                <input class="btn btn-success" type="button" value="显示文件" @click="get"/>
+            </p>
+        </div>
+        <hr/>
+        <div id="listTheFiles">
+            <div v-if="show">
+                <ul v-for="url in listFiles">
+                    <li><a :href="'download/'+ url ">{{url}}</a></li>
+                </ul>
+            </div>
+            <div v-else="show">
+                <p>暂无文件</p>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    $(function(){
+        var data4Vue = {
+            listFiles: [],
+            show:true
+        };
+        var vue = new Vue({
+            el:"#app",
+            data:data4Vue,
+            mounted:function () {
+                //mounted　表示这个 Vue 对象加载成功了
+                this.get();
+            },
+            methods:{
+                get:function () {
+                    var url = "listFiles";
+                    console.log(url);
+                    axios.get(url).then(function (response) {
+                        var result = response.data;
+                        if (result.result == "success" && result.data.length > 0) {
+                            vue.listFiles= result.data;
+                            vue.show = true;
+                        }else{
+                            vue.show = false;
+                        }
+                    });
+
+                },
+                upload:function () {
+                    var uploadBtn = document.getElementById("upload");
+                    uploadBtn.innerHTML = "上传中...";
+                    uploadBtn.setAttribute("disabled", "disabled");
+                    var files = document.getElementById("file").files;
+                    var formData = new FormData();
+                    var url = "";
+                    if (files.length == 1) {
+                        url = "upload";
+                        formData.append("file",files[0]);
+                    }else {
+                        url = "/batch";
+                        for (var i = 0; i < files.length; i++){
+                            formData.append("file",files[i]);
+                        }
+                    }
+                    axios.post(url,formData).then(function (response) {
+                        document.getElementById("file").value = null;
+                         vue.get();
+                    })
+                    uploadBtn.innerHTML = "上传";
+                    uploadBtn.removeAttribute("disabled");
+                }
+            }
+        });
+    });
+
+</script>
+</html>

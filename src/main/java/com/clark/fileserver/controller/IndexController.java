@@ -10,8 +10,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
  */
 @Controller
 public class IndexController {
+    @RequestMapping("/oldFile")
+    public String oldFile() {
+        return "file";
+    }
+
     @RequestMapping("/")
     public String index() {
-        return "file";
+        return "anotherfile";
     }
 }
