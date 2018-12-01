@@ -1,27 +1,35 @@
 <!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>文件传输</title>
+    <link th:href="@{/bootstrap/css/bootstrap.css}" rel="stylesheet">
+    <script th:src="@{/jquery/jquery-3.3.1.min.js}"></script>
 </head>
 <body>
-<p>单文件上传</p>
-<form action="upload" method="POST" enctype="multipart/form-data">
-    文件：<input type="file" name="file"/>
-    <input type="submit"/>
-</form>
-<hr/>
-<p>多文件上传</p>
-<form method="POST" enctype="multipart/form-data" action="batch" id="multipartFrom">
-    <div id="files">
-        <p id="file-1">文件1：<input type="file" name="file" /></p>
-        <p id="file-2">文件2：<input type="file" name="file" /></p>
+<div class="form-actions">
+    <h4>单文件上传</h4>
+    <hr/>
+    <form action="upload" method="POST" enctype="multipart/form-data">
+        文件：<input type="file" name="file"/>
+        <input  class="btn btn-info"  type="submit"/>
+    </form>
+</div>
+<div class="form-actions">
+    <h4>多文件上传</h4>
+    <p><input class="btn btn-success" type="button" value="增加上传文件" onclick="addFileUploadButton()"/></p>
+   <hr/>
+    <form method="POST" enctype="multipart/form-data" action="batch" id="multipartFrom">
+        <div id="files">
+            <p id="file-1">文件1：<input type="file" name="file"/></p>
+            <p id="file-2">文件2：<input type="file" name="file"/></p>
+        </div>
+        <hr/>
+        <p><input class="btn btn-info" type="submit" value="上传"/></p>
+    </form>
     </div>
-    <p><input type="submit" value="上传"/></p>
-</form>
-<p><input type="button" value="增加上传文件" onclick="addFileUploadButton()"/></p>
-<hr/>
-<p>文件下载</p>
+<h4>文件下载</h4>
 <a href="download">下载文件</a>
 </body>
 <script>
@@ -46,7 +54,11 @@
         var num = str.slice(splitStartIndex);
         return parseInt(num)+1;
         }
-
-
 </script>
+<style>
+    .form-actions{
+        margin-top: -15px;
+        margin-bottom: -5px;
+    }
+</style>
 </html>
