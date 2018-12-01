@@ -1,20 +1,19 @@
 package com.clark.fileserver.controller;
 
+import com.clark.fileserver.pojo.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,6 +32,7 @@ public class FileController {
 
     /**
      * 单个文件上传
+     *
      * @param file 上传的文件
      * @return
      */
@@ -59,9 +59,9 @@ public class FileController {
             //写入文件
             file.transferTo(upload);
             return "上传成功";
-        }catch (IllegalStateException e){
+        } catch (IllegalStateException e) {
             e.printStackTrace();
-        }catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return "上传失败";
@@ -69,20 +69,23 @@ public class FileController {
 
     /**
      * 多文件上传
+     *
      * @param request
      * @return
      */
     @PostMapping("/batch")
     public String handleFileUpload(HttpServletRequest request) {
+        //获取文件列表
         List<MultipartFile> files = ((MultipartHttpServletRequest) request).getFiles("file");
 
         MultipartFile file = null;
         BufferedOutputStream stream = null;
 
         int fileSize = files.size();
+        //循坏写入文件
         for (int i = 0; i < fileSize; i++) {
             file = files.get(i);
-            int fileNum = i+1;
+            int fileNum = i + 1;
             if (!file.isEmpty()) {
                 try {
                     byte[] bytes = file.getBytes();
@@ -97,11 +100,93 @@ public class FileController {
                     return "第 " + fileNum + " 个文件上传失败 ==> "
                             + e.getMessage();
                 }
-            }else {
+            } else {
                 return "第 " + fileNum + " 个文件上传失败，因为该文件为空";
             }
         }
         return "上传成功";
     }
 
+    /**
+     * 获取文件列表
+     *
+     * @return
+     */
+    @GetMapping("/listFiles")
+    public Result listFiles() {
+        Result result = new Result();
+        List<String> list = new ArrayList<>();
+        File upload = new File(filePath);
+        //获取文件夹下的所有文件
+        File[] files = upload.listFiles();
+        if (files.length != 0) {
+            for (File file : files) {
+                //是文件的情况下才添加到list
+                if (file.isFile()) {
+                    list.add(file.getName());
+                }
+            }
+        }
+        result.setData(list);
+        result.setResult("success");
+        return result;
+    }
+
+    /**
+     * 下载文件
+     * @param fileName
+     * @param response
+     * @return
+     */
+    @GetMapping("/download/{fileName}")
+    public Result download(@PathVariable("fileName") String fileName, HttpServletResponse response) {
+        Result result = new Result();
+        Path path = Paths.get(filePath, fileName);
+        File file = path.toFile();
+        if (file.exists() && file.isFile()) {
+            response.setContentType("application/force-download");
+            response.addHeader("Content-Disposition", "attachment;fileName=" + fileName);
+            byte[] bytes = new byte[1024];
+            FileInputStream fis = null;
+            BufferedInputStream bis = null;
+
+            try {
+                fis = new FileInputStream(file);
+                bis = new BufferedInputStream(fis);
+
+                OutputStream os = response.getOutputStream();
+                int len = 0;
+                while ((len = bis.read(bytes)) != -1) {
+                    os.write(bytes,0,len);
+                }
+
+                result.setResult("success");
+                result.setData("下载成功");
+                return result;
+
+            } catch (Exception e) {
+
+            } finally {
+                if (fis != null) {
+                    try {
+                        fis.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if (bis != null) {
+                    try {
+                        bis.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+        }
+        result.setResult("error");
+        result.setData("下载失败");
+        return result;
+    }
 }

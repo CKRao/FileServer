@@ -18,7 +18,9 @@
 </div>
 <div class="form-actions">
     <h4>多文件上传</h4>
-    <p><input class="btn btn-success" type="button" value="增加上传文件" onclick="addFileUploadButton()"/></p>
+    <p>
+        <input class="btn btn-success" type="button" value="增加上传文件" onclick="addFileUploadButton()"/>
+    </p>
    <hr/>
     <form method="POST" enctype="multipart/form-data" action="batch" id="multipartFrom">
         <div id="files">
@@ -28,9 +30,18 @@
         <hr/>
         <p><input class="btn btn-info" type="submit" value="上传"/></p>
     </form>
+</div>
+<div class="form-actions">
+    <div class="download-title">
+        <h4>文件下载</h4>
+        <p>
+            <input class="btn btn-success" type="button" value="显示文件" onclick="listFiles()"/>
+        </p>
     </div>
-<h4>文件下载</h4>
-<a href="download">下载文件</a>
+    <hr/>
+    <div id="listTheFiles"></div>
+</div>
+
 </body>
 <script>
     function addFileUploadButton() {
@@ -54,11 +65,34 @@
         var num = str.slice(splitStartIndex);
         return parseInt(num)+1;
         }
+
+        $(
+            function listFiles() {
+                $.ajax({
+                    method:"GET",
+                    url:"listFiles",
+                    success:function (data) {
+                        var result = data;
+                        if (result.result == "success") {
+                            var urls = result.data;
+                            for (var i = 0; i < urls.length; i++) {
+                                var url ="download/"+ urls[i]
+                                var node = "<a href=\""+url+"\">"+urls[i]+"</a><br>";
+                                $("#listTheFiles").append(node);
+                            }
+                        }
+                    }
+                })
+            }
+        );
 </script>
 <style>
     .form-actions{
         margin-top: -15px;
         margin-bottom: -5px;
+    }
+    .download-title{
+        margin-left: 20px;
     }
 </style>
 </html>
