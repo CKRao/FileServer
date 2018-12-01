@@ -82,6 +82,7 @@ public class FileController {
         int fileSize = files.size();
         for (int i = 0; i < fileSize; i++) {
             file = files.get(i);
+            int fileNum = i+1;
             if (!file.isEmpty()) {
                 try {
                     byte[] bytes = file.getBytes();
@@ -93,11 +94,11 @@ public class FileController {
                 } catch (IOException e) {
                     e.printStackTrace();
                     stream = null;
-                    return "第 " + i + " 个文件上传失败 ==> "
+                    return "第 " + fileNum + " 个文件上传失败 ==> "
                             + e.getMessage();
                 }
             }else {
-                return "第 " + i + " 个文件上传失败，因为该文件为空";
+                return "第 " + fileNum + " 个文件上传失败，因为该文件为空";
             }
         }
         return "上传成功";

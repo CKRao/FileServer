@@ -11,14 +11,42 @@
     <input type="submit"/>
 </form>
 <hr/>
-<p>文件下载</p>
-<a href="download">下载文件</a>
-<hr/>
 <p>多文件上传</p>
-<form method="POST" enctype="multipart/form-data" action="batch">
-    <p>文件1：<input type="file" name="file"/></p>
-    <p>文件2：<input type="file" name="file"/></p>
+<form method="POST" enctype="multipart/form-data" action="batch" id="multipartFrom">
+    <div id="files">
+        <p id="file-1">文件1：<input type="file" name="file" /></p>
+        <p id="file-2">文件2：<input type="file" name="file" /></p>
+    </div>
     <p><input type="submit" value="上传"/></p>
 </form>
+<p><input type="button" value="增加上传文件" onclick="addFileUploadButton()"/></p>
+<hr/>
+<p>文件下载</p>
+<a href="download">下载文件</a>
 </body>
+<script>
+    function addFileUploadButton() {
+        //获取增加第几个文件
+        var num = countNodes();
+        var para=document.createElement("p");
+        para.id = "file-"+num;
+        var node=document.createTextNode("文件"+num+"：");
+        para.appendChild(node);
+        var input=document.createElement("input");
+        input.type = "file";
+        input.name = "file";
+        para.appendChild(input);
+        document.getElementById("files").appendChild(para);
+    }
+    //计算需要增加第几个文件
+    function countNodes() {
+        var node = document.getElementById("files").lastElementChild;
+        var str = node.id + "";
+        var splitStartIndex =str.lastIndexOf("-")+1;
+        var num = str.slice(splitStartIndex);
+        return parseInt(num)+1;
+        }
+
+
+</script>
 </html>
