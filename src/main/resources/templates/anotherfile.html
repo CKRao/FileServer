@@ -10,23 +10,28 @@
     <script th:src="@{/vue/vue.min.js}"></script>
 </head>
 <style>
+    body{
+        background-color: #f5f5f5;
+    }
     .form-actions{
         margin-top: -15px;
         margin-bottom: -5px;
     }
-    .download-title{
+    .download-title .upload-title{
         margin-left: 20px;
     }
 </style>
 <body>
 <div id="app">
     <div class="form-actions">
-        <h4>文件上传</h4>
-        <hr/>
-        <div>
-            文件：<input id="file" type="file" name="file"  multiple="multiple"/>
-            <a href="#" class="btn btn-info" @click="upload" id="upload">上传</a>
-            <a href="/oldFile" class="btn btn-danger" style="float: right">旧版上传页面</a>
+        <div class="upload-title" >
+            <h4 >文件上传</h4>
+            <hr/>
+            <div>
+                文件：<input id="file" type="file" name="file"  multiple="multiple"/>
+                <a href="#" class="btn btn-info" @click="upload" id="upload">上传</a>
+                <a href="/oldFile" class="btn btn-danger" style="float: right">旧版上传页面</a>
+            </div>
         </div>
     </div>
     <div class="form-actions">
