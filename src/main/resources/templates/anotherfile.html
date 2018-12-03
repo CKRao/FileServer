@@ -101,10 +101,14 @@
                     }
                     axios.post(url,formData).then(function (response) {
                         document.getElementById("file").value = null;
+                        uploadBtn.innerHTML = "上传";
+                        uploadBtn.removeAttribute("disabled");
                          vue.get();
-                    })
-                    uploadBtn.innerHTML = "上传";
-                    uploadBtn.removeAttribute("disabled");
+                    }).catch(function (reason) {
+                        console.log(reason);
+                        uploadBtn.innerHTML = "上传";
+                        uploadBtn.removeAttribute("disabled");
+                    });
                 }
             }
         });

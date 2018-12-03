@@ -120,13 +120,17 @@ public class FileController {
         File upload = new File(filePath);
         //获取文件夹下的所有文件
         File[] files = upload.listFiles();
-        if (files.length != 0) {
+        if (files != null && files.length != 0) {
             for (File file : files) {
                 //是文件的情况下才添加到list
                 if (file.isFile()) {
                     list.add(file.getName());
                 }
             }
+        }else {
+            result.setData(list);
+            result.setResult("error");
+            return result;
         }
         result.setData(list);
         result.setResult("success");
