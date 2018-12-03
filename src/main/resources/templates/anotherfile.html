@@ -5,61 +5,19 @@
     <meta charset="UTF-8">
     <title>文件传输</title>
     <link th:href="@{/bootstrap/css/bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/css/anotherfile.css}" rel="stylesheet">
     <script th:src="@{/jquery/jquery-3.3.1.min.js}"></script>
     <script th:src="@{/axios/axios.min.js}"></script>
     <script th:src="@{/vue/vue.min.js}"></script>
 </head>
-<style>
-    body{
-        background-color: #f5f5f5;
-    }
-    .form-actions{
-        margin-top: -15px;
-        margin-bottom: -5px;
-    }
-    .download-title .upload-title{
-        margin-left: 20px;
-    }
-</style>
 <body>
-<div id="app">
-    <div class="form-actions">
-        <div class="upload-title" >
-            <h4 >文件上传</h4>
-            <hr/>
-            <div>
-                文件：<input id="file" type="file" name="file"  multiple="multiple"/>
-                <a href="#" class="btn btn-info" @click="upload" id="upload">上传</a>
-                <a href="/oldFile" class="btn btn-danger" style="float: right">旧版上传页面</a>
-            </div>
-        </div>
-    </div>
-    <div class="form-actions">
-        <div class="download-title">
-            <h4>文件下载</h4>
-            <p>
-                <input class="btn btn-success" type="button" value="显示文件" @click="get"/>
-            </p>
-        </div>
-        <hr/>
-        <div id="listTheFiles">
-            <div v-if="show">
-                <ul v-for="url in listFiles">
-                    <li><a :href="'download/'+ url ">{{url}}</a></li>
-                </ul>
-            </div>
-            <div v-else="show">
-                <p>暂无文件</p>
-            </div>
-        </div>
-    </div>
-</div>
-</body>
 <script>
     $(function(){
         var data4Vue = {
             listFiles: [],
-            show:true
+            show:false,
+            success:false,
+            error:false
         };
         var vue = new Vue({
             el:"#app",
@@ -84,6 +42,8 @@
 
                 },
                 upload:function () {
+                    vue.success = false;
+                    vue.error = false;
                     var uploadBtn = document.getElementById("upload");
                     uploadBtn.innerHTML = "上传中...";
                     uploadBtn.setAttribute("disabled", "disabled");
@@ -100,19 +60,72 @@
                         }
                     }
                     axios.post(url,formData).then(function (response) {
-                        document.getElementById("file").value = null;
-                        uploadBtn.innerHTML = "上传";
-                        uploadBtn.removeAttribute("disabled");
-                         vue.get();
+                        console.log(response.data);
+                        var result = response.data;
+                        if (result.result == "success" || result.result == "all_success"){
+                            vue.success = true;
+                            document.getElementById("file").value = null;
+                            uploadBtn.innerHTML = "上传";
+                            uploadBtn.removeAttribute("disabled");
+                            vue.get();
+                        }else if(result.result == "error"){
+                            vue.error = true;
+                            uploadBtn.innerHTML = "重新上传";
+                            uploadBtn.removeAttribute("disabled");
+                            vue.get();
+                        }else if(result.result == "some_error"){
+                            vue.success = true;
+                            document.getElementById("file").value = null;
+                            document.getElementById("success").innerText = "部分上传成功";
+                            uploadBtn.innerHTML = "上传";
+                            uploadBtn.removeAttribute("disabled");
+                            vue.get();
+                        }
                     }).catch(function (reason) {
+                        vue.error = true;
                         console.log(reason);
                         uploadBtn.innerHTML = "上传";
                         uploadBtn.removeAttribute("disabled");
+                        alert("上传失败：请检查网络或文件大小!")
                     });
                 }
             }
         });
     });
-
 </script>
+<div id="app" v-cloak>
+    <div class="form-actions">
+        <div class="upload-title" >
+            <h4 >文件上传</h4>
+            <hr/>
+            <div>
+                文件：<input id="file" type="file" name="file"  multiple="multiple"/>
+                <a href="#" class="btn btn-info" @click="upload" id="upload">上传</a>
+                <span id="success"v-show="success" >上传成功</span>
+                <span id="error"v-show="error">上传失败</span>
+                <a href="/oldFile" class="btn btn-danger" style="float: right">旧版上传页面</a>
+            </div>
+        </div>
+    </div>
+    <div class="form-actions">
+        <div class="download-title">
+            <h4>文件下载</h4>
+            <p>
+                <input class="btn btn-success" type="button" value="显示文件" @click="get"/>
+            </p>
+        </div>
+        <hr/>
+        <div id="listTheFiles">
+            <div v-if="show">
+                <ul v-for="url in listFiles">
+                    <li><a :href="'download/'+ url ">{{url}}</a></li>
+                </ul>
+            </div>
+            <div v-else="show">
+                <p >暂无文件</p>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
 </html>

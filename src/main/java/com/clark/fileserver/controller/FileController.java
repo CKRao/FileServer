@@ -38,17 +38,21 @@ public class FileController {
      * @return
      */
     @RequestMapping("/upload")
-    public String upload(@RequestParam("file") MultipartFile file) {
+    public Result upload(@RequestParam("file") MultipartFile file) {
+        Result result = new Result();
         try {
             if (file.isEmpty()) {
-                return "文件为空";
+                result.setResult("error");
+                result.setData("文件为空");
+                return result;
             }
             //获取文件名
             final String fileName = file.getOriginalFilename();
             LOGGER.info("上传的文件名为：" + fileName);
+//            System.out.println(fileName.lastIndexOf("."));
             //获取文件后缀名
-            final String suffixName = fileName.substring(fileName.lastIndexOf("."));
-            LOGGER.info("文件的后缀名为：" + suffixName);
+//            final String suffixName = fileName.substring(fileName.lastIndexOf("."));
+//            LOGGER.info("文件的后缀名为：" + suffixName);
             //设置文件存储路径
             String path = filePath + fileName;
             File upload = new File(path);
@@ -57,15 +61,26 @@ public class FileController {
                 //新建目录
                 upload.getParentFile().mkdirs();
             }
+            LOGGER.info("准备写入文件");
             //写入文件
             file.transferTo(upload);
-            return "上传成功";
+            LOGGER.info("写入文件成功");
+            result.setResult("success");
+            result.setData("上传成功");
+            return result;
         } catch (IllegalStateException e) {
+            LOGGER.error("------产生异常-------");
+            result.setResult("error");
+            result.setData("IllegalStateException");
             e.printStackTrace();
         } catch (IOException e) {
+            LOGGER.error("------产生异常-------");
+            result.setResult("error");
+            result.setData("IOException");
             e.printStackTrace();
         }
-        return "上传失败";
+        LOGGER.error("------上传失败-------");
+        return result;
     }
 
     /**
@@ -75,13 +90,16 @@ public class FileController {
      * @return
      */
     @PostMapping("/batch")
-    public String handleFileUpload(HttpServletRequest request) {
+    public Result handleFileUpload(HttpServletRequest request) {
+        Result result = new Result();
+        List<String> results = new ArrayList<>();
         //获取文件列表
         List<MultipartFile> files = ((MultipartHttpServletRequest) request).getFiles("file");
 
         MultipartFile file = null;
         BufferedOutputStream stream = null;
 
+        result.setResult("all_success");
         int fileSize = files.size();
         //循坏写入文件
         for (int i = 0; i < fileSize; i++) {
@@ -95,17 +113,20 @@ public class FileController {
                             new File(filePath + file.getOriginalFilename())));
                     stream.write(bytes);
                     stream.close();
+                    results.add("第"+ fileNum + "个文件上传成功");
                 } catch (IOException e) {
                     e.printStackTrace();
                     stream = null;
-                    return "第 " + fileNum + " 个文件上传失败 ==> "
-                            + e.getMessage();
+                    result.setResult("some_error");
+                    results.add("第"+ fileNum + "个文件上传失败");
                 }
             } else {
-                return "第 " + fileNum + " 个文件上传失败，因为该文件为空";
+                result.setResult("some_error");
+                results.add("第"+ fileNum + "个文件为空");
             }
         }
-        return "上传成功";
+        result.setData(results);
+        return result;
     }
 
     /**

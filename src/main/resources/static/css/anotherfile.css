@@ -1,0 +1,19 @@
+body{
+    background-color: #f5f5f5;
+}
+.form-actions{
+    margin-top: -15px;
+    margin-bottom: -5px;
+}
+.download-title upload-title{
+    margin-left: 20px;
+}
+#success{
+    color: green;
+}
+#error{
+    color: red;
+}
+[v-cloak]{
+    display: none;
+}
